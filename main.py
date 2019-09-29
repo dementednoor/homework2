@@ -65,15 +65,22 @@ def path_init(start_message):
 
 
 def sync_checker(core_name, curr_task):
-    for task_name in Existing_tasks:
-        if (task_name and curr_task in Cores[core_name]) and task_name != curr_task \
-                and Existing_tasks[task_name] != 'terminate':  # checking all tasks but current
-            res = '{}. {}'.format(Error_dict['PA'], 'Referring to {} while {} is not terminated'
-                                 .format(curr_task, task_name))
-            #  print(colored(res, 'red')) - uncomment if you want to see errors in console too
-            return res
-        else:
-            return None
+    for tsk in Existing_tasks:
+        # checking if two tasks are different and if they both are running at the same core
+        if tsk and curr_task in Cores[core_name] and curr_task != tsk:
+            try:
+                if Existing_tasks[tsk] != 'terminate' and Existing_tasks[curr_task] in ['active', 'start']:
+                    res = '{}. ({}:{}, {}:{})'.format(Error_dict['PA'], curr_task, Existing_tasks[curr_task],
+                                                      tsk, Existing_tasks[tsk])
+                    return res
+                elif Existing_tasks[curr_task] != 'terminate' and Existing_tasks[tsk] in ['active', 'start']:
+                    res = '{}. ({}:{}, {}:{})'.format(Error_dict['PA'], curr_task, Existing_tasks[curr_task],
+                                                      tsk, Existing_tasks[tsk])
+                    return res
+            except KeyError:  # raises if the task is not among existing ones yet
+                if Existing_tasks[tsk] in ['active', 'start']:
+                    res = '{}. {}'.format(Error_dict['PA'], 'Starting one task while another is not terminated')
+                    return res
 
 
 if __name__ == '__main__':
@@ -87,7 +94,7 @@ if __name__ == '__main__':
     strings.pop(-1)  # deleting the last item because it's empty
     core_tasks = []
     with open('/home/noor/PycharmProjects/luxoft-hw/error_report.txt', 'w') as er:
-        for s in strings[1:30]:
+        for s in strings:
             #  print(s)
             task_info = s.split(',')
             task_id = task_info[4]
@@ -98,11 +105,9 @@ if __name__ == '__main__':
             task = Task(task_id, task_info[-1])  # -1 as the last one parameter (state)
             if task.order_error_check(Existing_tasks.get(task.name)) is not None:
                 Error_list.append('{}. {}'.format(s, task.order_error_check(Existing_tasks.get(task.name))))
-                er.write('{}. {}'.format(s, task.order_error_check(Existing_tasks.get(task.name))))
+                er.write('{} {} {}\n'.format(task_info[0], strings.index(s) + 2,
+                                             task.order_error_check(Existing_tasks.get(task.name))))
+            task.state_update()
             if sync_checker(core, task_id) is not None:
                 Error_list.append('{}. {}'.format(s, sync_checker(core, task_id)))
-                er.write('{}. {}'.format(s, sync_checker(core, task_id)))
-            task.state_update()
-        print('-'*30)
-        for e in Error_list:
-            print(e)
+                er.write('{} {} {}\n'.format(task_info[0], strings.index(s)+2, sync_checker(core, task_id)))
