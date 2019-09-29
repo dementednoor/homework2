@@ -62,6 +62,7 @@ def path_init(start_message):
         print('Working directory remains the same.\n')
     else:
         path_init("Please answer 'y' or 'n'")
+    return os.getcwd()
 
 
 def sync_checker(core_name, curr_task):
@@ -81,6 +82,8 @@ def sync_checker(core_name, curr_task):
                 if Existing_tasks[tsk] in ['active', 'start']:
                     res = '{}. {}'.format(Error_dict['PA'], 'Starting one task while another is not terminated')
                     return res
+        else:
+            return None
 
 
 if __name__ == '__main__':
