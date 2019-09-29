@@ -82,8 +82,6 @@ def sync_checker(core_name, curr_task):
                 if Existing_tasks[tsk] in ['active', 'start']:
                     res = '{}. {}'.format(Error_dict['PA'], 'Starting one task while another is not terminated')
                     return res
-        else:
-            return None
 
 
 if __name__ == '__main__':
