@@ -1,0 +1,1 @@
+1712855,Core1,0,T,T1,272,start. Wrong actions order for a single task. T1 is not activated13616176,Core1,0,T,T2,274,terminate. Parallel activity on single core. Referring to T2 while T1 is not terminated33740016,Core1,0,T,T2,280,terminate. Parallel activity on single core. Referring to T2 while T1 is not terminated
