@@ -1,5 +1,6 @@
 import os
 from termcolor import colored
+import sys
 
 
 Error_dict = {
@@ -85,30 +86,36 @@ def sync_checker(core_name, curr_task):
 
 
 if __name__ == '__main__':
-    os.chdir('/home/noor/luxoft_hw/')
-    path_init('Your current working directory is {}.'
-              ' Would you like to change it? (y/n)'.format(colored(os.getcwd(), 'green')))
-    with open('Demo_Exercise_Trace.btf', 'r') as f:
-        data = f.read()
-    strings = data.split('\n')
-    strings.pop(0)  # deleting the 1st item because it's a comment
-    strings.pop(-1)  # deleting the last item because it's empty
-    core_tasks = []
-    with open('/home/noor/PycharmProjects/luxoft-hw/error_report.txt', 'w') as er:
-        for s in strings:
-            #  print(s)
-            task_info = s.split(',')
-            task_id = task_info[4]
-            core = task_info[1]
-            if task_id not in core_tasks:
-                core_tasks.append(task_id)
-            Cores[core] = core_tasks
-            task = Task(task_id, task_info[-1])  # -1 as the last one parameter (state)
-            if task.order_error_check(Existing_tasks.get(task.name)) is not None:
-                Error_list.append('{}. {}'.format(s, task.order_error_check(Existing_tasks.get(task.name))))
-                er.write('{} {} {}\n'.format(task_info[0], strings.index(s) + 2,
-                                             task.order_error_check(Existing_tasks.get(task.name))))
-            task.state_update()
-            if sync_checker(core, task_id) is not None:
-                Error_list.append('{}. {}'.format(s, sync_checker(core, task_id)))
-                er.write('{} {} {}\n'.format(task_info[0], strings.index(s)+2, sync_checker(core, task_id)))
+    try:
+        os.chdir(sys.argv[1])  # path to dir with btf file
+        path_init('Your current working directory is {}.'
+                  ' Would you like to change it? (y/n)'.format(colored(os.getcwd(), 'green')))
+        with open('Demo_Exercise_Trace.btf', 'r') as f:
+            data = f.read()
+        strings = data.split('\n')
+        strings.pop(0)  # deleting the 1st item because it's a comment
+        strings.pop(-1)  # deleting the last item because it's empty
+        with open(sys.argv[2], 'w') as er:
+            for s in strings:
+                #  print(s)
+                task_info = s.split(',')
+                task_id = task_info[4]
+                core = task_info[1]
+                try:
+                    if task_id not in Cores[core]:
+                        Cores[core].append(task_id)
+                except KeyError:
+                    Cores[core] = []
+                    Cores[core].append(task_id)
+                #  Cores[core] = core_tasks
+                task = Task(task_id, task_info[-1])  # -1 as the last one parameter (state)
+                if task.order_error_check(Existing_tasks.get(task.name)) is not None:
+                    Error_list.append('{}. {}'.format(s, task.order_error_check(Existing_tasks.get(task.name))))
+                    er.write('{} {} {}\n'.format(task_info[0], strings.index(s) + 2,
+                                                 task.order_error_check(Existing_tasks.get(task.name))))
+                task.state_update()
+                if sync_checker(core, task_id) is not None:
+                    Error_list.append('{}. {}'.format(s, sync_checker(core, task_id)))
+                    er.write('{} {} {}\n'.format(task_info[0], strings.index(s)+2, sync_checker(core, task_id)))
+    except IndexError:
+        print("You didn't specify paths to the btf directory and output file. Please, try again")

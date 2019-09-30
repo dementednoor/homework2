@@ -1,7 +1,8 @@
 import unittest
 import os
+import sys
 from termcolor import colored
-from btf_tracer import trace_error_checker
+import trace_error_checker
 
 
 class MyTestCase(unittest.TestCase):
@@ -12,8 +13,13 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual(os.getcwd(), file_path)
 
     def test_empty_file_checker(self):  # checking if trace file is not empty
-        os.chdir('/home/noor/luxoft_hw/')
-        self.assertFalse(os.path.getsize('Demo_Exercise_Trace.btf') == 0)
+        try:
+            path = sys.argv[1]
+            os.chdir(path)
+            self.assertFalse(os.path.getsize('Demo_Exercise_Trace.btf') == 0)
+        except IndexError:
+            #  print("You didn't specify path to the btf file. Please, try again")
+            self.skipTest('No path parameter')
 
     def test_order_error_checker1(self):  # checking activate -> start sequence
         t = trace_error_checker.Task('T1', 'start')
@@ -44,4 +50,4 @@ class MyTestCase(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    unittest.main()
+    unittest.main(argv=['first-arg-is-ignored'], exit=False)
