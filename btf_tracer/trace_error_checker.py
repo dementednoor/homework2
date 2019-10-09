@@ -10,7 +10,34 @@ Error_dict = {
 Error_list = []
 State_sequence = ['activate', 'start', 'terminate']
 Existing_tasks = {}  # task:state
-Cores = {}  # core: list of tasks
+# core: list of tasks
+
+
+class Core:
+    def __init__(self, name):
+        self.name = name
+        self.tasks = []
+
+    def add_tasks(self, task):
+        self.tasks.append(task)
+
+    def sync_checker(self, curr_task):
+        for tsk in Existing_tasks:
+            # checking if two tasks are different and if they both are running at the same core
+            if tsk and curr_task in self.tasks and curr_task != tsk:
+                try:
+                    if Existing_tasks[tsk] != 'terminate' and Existing_tasks[curr_task] in ['active', 'start']:
+                        res = '{}. ({}:{}, {}:{})'.format(Error_dict['PA'], curr_task, Existing_tasks[curr_task],
+                                                          tsk, Existing_tasks[tsk])
+                        return res
+                    elif Existing_tasks[curr_task] != 'terminate' and Existing_tasks[tsk] in ['active', 'start']:
+                        res = '{}. ({}:{}, {}:{})'.format(Error_dict['PA'], curr_task, Existing_tasks[curr_task],
+                                                          tsk, Existing_tasks[tsk])
+                        return res
+                except KeyError:  # raises if the task is not among existing ones yet
+                    if Existing_tasks[tsk] in ['active', 'start']:
+                        res = '{}. {}'.format(Error_dict['PA'], 'Starting one task while another is not terminated')
+                        return res
 
 
 class Task:
@@ -66,25 +93,6 @@ def path_init(start_message):
     return os.getcwd()
 
 
-def sync_checker(core_name, curr_task):
-    for tsk in Existing_tasks:
-        # checking if two tasks are different and if they both are running at the same core
-        if tsk and curr_task in Cores[core_name] and curr_task != tsk:
-            try:
-                if Existing_tasks[tsk] != 'terminate' and Existing_tasks[curr_task] in ['active', 'start']:
-                    res = '{}. ({}:{}, {}:{})'.format(Error_dict['PA'], curr_task, Existing_tasks[curr_task],
-                                                      tsk, Existing_tasks[tsk])
-                    return res
-                elif Existing_tasks[curr_task] != 'terminate' and Existing_tasks[tsk] in ['active', 'start']:
-                    res = '{}. ({}:{}, {}:{})'.format(Error_dict['PA'], curr_task, Existing_tasks[curr_task],
-                                                      tsk, Existing_tasks[tsk])
-                    return res
-            except KeyError:  # raises if the task is not among existing ones yet
-                if Existing_tasks[tsk] in ['active', 'start']:
-                    res = '{}. {}'.format(Error_dict['PA'], 'Starting one task while another is not terminated')
-                    return res
-
-
 if __name__ == '__main__':
     try:
         os.chdir(sys.argv[1])  # path to dir with btf file
@@ -100,22 +108,17 @@ if __name__ == '__main__':
                 #  print(s)
                 task_info = s.split(',')
                 task_id = task_info[4]
-                core = task_info[1]
-                try:
-                    if task_id not in Cores[core]:
-                        Cores[core].append(task_id)
-                except KeyError:
-                    Cores[core] = []
-                    Cores[core].append(task_id)
-                #  Cores[core] = core_tasks
+                core = Core(task_info[1])
+                if task_id not in core.tasks:
+                    core.tasks.append(task_id)
                 task = Task(task_id, task_info[-1])  # -1 as the last one parameter (state)
                 if task.order_error_check(Existing_tasks.get(task.name)) is not None:
                     Error_list.append('{}. {}'.format(s, task.order_error_check(Existing_tasks.get(task.name))))
                     er.write('{} {} {}\n'.format(task_info[0], strings.index(s) + 2,
                                                  task.order_error_check(Existing_tasks.get(task.name))))
                 task.state_update()
-                if sync_checker(core, task_id) is not None:
-                    Error_list.append('{}. {}'.format(s, sync_checker(core, task_id)))
-                    er.write('{} {} {}\n'.format(task_info[0], strings.index(s)+2, sync_checker(core, task_id)))
+                if core.sync_checker(task_id) is not None:
+                    Error_list.append('{}. {}'.format(s, core.sync_checker(task_id)))
+                    er.write('{} {} {}\n'.format(task_info[0], strings.index(s)+2, core.sync_checker(task_id)))
     except IndexError:
         print("You didn't specify paths to the btf directory and output file. Please, try again")
