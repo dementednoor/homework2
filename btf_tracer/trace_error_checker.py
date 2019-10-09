@@ -18,7 +18,7 @@ class Core:
         self.name = name
         self.tasks = []
 
-    def add_tasks(self, task):
+    def add_task(self, task):
         self.tasks.append(task)
 
     def sync_checker(self, curr_task):
@@ -110,7 +110,7 @@ if __name__ == '__main__':
                 task_id = task_info[4]
                 core = Core(task_info[1])
                 if task_id not in core.tasks:
-                    core.tasks.append(task_id)
+                    core.add_task(task_id)
                 task = Task(task_id, task_info[-1])  # -1 as the last one parameter (state)
                 if task.order_error_check(Existing_tasks.get(task.name)) is not None:
                     Error_list.append('{}. {}'.format(s, task.order_error_check(Existing_tasks.get(task.name))))
