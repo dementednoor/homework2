@@ -10,6 +10,7 @@ Error_dict = {
 Error_list = []
 State_sequence = ['activate', 'start', 'terminate']
 Existing_tasks = {}  # task:state
+Existing_cores = []
 # core: list of tasks
 
 
@@ -103,14 +104,23 @@ if __name__ == '__main__':
         strings = data.split('\n')
         strings.pop(0)  # deleting the 1st item because it's a comment
         strings.pop(-1)  # deleting the last item because it's empty
+        core = Core('Core1')  # let's consider there is always at least one core with this standard name
+        Existing_cores.append(core)
         with open(sys.argv[2], 'w') as er:
             for s in strings:
                 #  print(s)
                 task_info = s.split(',')
                 task_id = task_info[4]
-                core = Core(task_info[1])
+                for c in Existing_cores:
+                    if c.name == task_info[1]:
+                        core = c
+                        break
+                    else:
+                        core = Core(task_info[1])
+                        Existing_cores.append(core)
                 if task_id not in core.tasks:
                     core.add_task(task_id)
+                print(core.name, core.tasks)
                 task = Task(task_id, task_info[-1])  # -1 as the last one parameter (state)
                 if task.order_error_check(Existing_tasks.get(task.name)) is not None:
                     Error_list.append('{}. {}'.format(s, task.order_error_check(Existing_tasks.get(task.name))))
