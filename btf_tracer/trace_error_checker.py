@@ -111,16 +111,17 @@ if __name__ == '__main__':
                 #  print(s)
                 task_info = s.split(',')
                 task_id = task_info[4]
+                core_exists = False
                 for c in Existing_cores:
                     if c.name == task_info[1]:
                         core = c
+                        core_exists = True
                         break
-                    else:
-                        core = Core(task_info[1])
-                        Existing_cores.append(core)
+                if not core_exists:
+                    core = Core(task_info[1])
+                    Existing_cores.append(core)
                 if task_id not in core.tasks:
                     core.add_task(task_id)
-                print(core.name, core.tasks)
                 task = Task(task_id, task_info[-1])  # -1 as the last one parameter (state)
                 if task.order_error_check(Existing_tasks.get(task.name)) is not None:
                     Error_list.append('{}. {}'.format(s, task.order_error_check(Existing_tasks.get(task.name))))
