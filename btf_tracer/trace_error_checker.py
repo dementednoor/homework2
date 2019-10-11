@@ -1,17 +1,6 @@
 import os
-from termcolor import colored
+#  from termcolor import colored - uncomment if you want to print error in red and cwd in green
 import sys
-
-
-Error_dict = {
-    'WO': 'Wrong actions order for a single task',  # WO for wrong order
-    'PA': "Parallel activity on single core"  # PA for parallel activity
-}
-Error_list = []
-State_sequence = ['activate', 'start', 'terminate']
-Existing_tasks = {}  # task:state
-Existing_cores = []
-# core: list of tasks
 
 
 class Core:
@@ -27,16 +16,12 @@ class Core:
             # checking if two tasks are different and if they both are running at the same core
             if tsk and curr_task in self.tasks and curr_task != tsk:
                 try:
-                    if Existing_tasks[tsk] != 'terminate' and Existing_tasks[curr_task] in ['active', 'start']:
-                        res = '{}. ({}:{}, {}:{})'.format(Error_dict['PA'], curr_task, Existing_tasks[curr_task],
-                                                          tsk, Existing_tasks[tsk])
-                        return res
-                    elif Existing_tasks[curr_task] != 'terminate' and Existing_tasks[tsk] in ['active', 'start']:
+                    if Existing_tasks[tsk] == 'start' and Existing_tasks[curr_task] == 'start':
                         res = '{}. ({}:{}, {}:{})'.format(Error_dict['PA'], curr_task, Existing_tasks[curr_task],
                                                           tsk, Existing_tasks[tsk])
                         return res
                 except KeyError:  # raises if the task is not among existing ones yet
-                    if Existing_tasks[tsk] in ['active', 'start']:
+                    if Existing_tasks[tsk] == 'start':
                         res = '{}. {}'.format(Error_dict['PA'], 'Starting one task while another is not terminated')
                         return res
 
@@ -52,7 +37,7 @@ class Task:
     def order_error_check(self, prev_state):
         try:
             prev_idx = State_sequence.index(prev_state)  # previous state index
-            if State_sequence[prev_idx+1] != self.state:
+            if State_sequence[prev_idx+1] != self.state and Full_state_sequence[prev_idx+1]:
                 res = '{}. {} follows {}'.format(Error_dict['WO'], self.state, prev_state)
                 #  print(colored(res, 'red')) - uncomment if you want to see errors in console too
                 return res
@@ -82,11 +67,11 @@ def path_init(start_message):
         path = input('Enter working directory path:\n')
         try:
             os.chdir(path)
-            print("Current path is {} now.".format(colored(os.getcwd(), 'green')))
+            print("Current path is {} now.".format((os.getcwd())))
         except FileNotFoundError:
             print("This path doesn't exist. Please, try again.")
             path_init('Your current working directory is {}. '
-                      'Would you like to change it? (y/n)'.format(colored(os.getcwd(), 'green')))
+                      'Would you like to change it? (y/n)'.format(os.getcwd()))
     elif answer == 'n':
         print('Working directory remains the same.\n')
     else:
@@ -96,9 +81,18 @@ def path_init(start_message):
 
 if __name__ == '__main__':
     try:
+        Error_dict = {
+            'WO': 'Wrong actions order for a single task',  # WO for wrong order
+            'PA': "Parallel activity on single core"  # PA for parallel activity
+        }
+        Error_list = []
+        State_sequence = ['activate', 'start', 'terminate']
+        Full_state_sequence = ['activate', 'start', 'preempt', 'resume', 'terminate']
+        Existing_tasks = {}  # task:state
+        Existing_cores = []
         os.chdir(sys.argv[1])  # path to dir with btf file
         path_init('Your current working directory is {}.'
-                  ' Would you like to change it? (y/n)'.format(colored(os.getcwd(), 'green')))
+                  ' Would you like to change it? (y/n)'.format(os.getcwd()))
         with open('Demo_Exercise_Trace.btf', 'r') as f:
             data = f.read()
         strings = data.split('\n')
