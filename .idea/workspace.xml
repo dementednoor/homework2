@@ -3,7 +3,9 @@
   <component name="ChangeListManager">
     <list default="true" id="7f1df482-35c7-442a-8ff5-501a5e99d84b" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/btf_tracer/test.py" beforeDir="false" afterPath="$PROJECT_DIR$/btf_tracer/test.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/btf_tracer/trace_error_checker.py" beforeDir="false" afterPath="$PROJECT_DIR$/btf_tracer/trace_error_checker.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/error_report.txt" beforeDir="false" afterPath="$PROJECT_DIR$/error_report.txt" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
