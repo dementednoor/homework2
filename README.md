@@ -5,9 +5,9 @@ Running script command should look like this:
 
 for example:
 
-`python   trace_error_checker.py /home/user/luxoft_hw/ /home/user/luxoft-hw/error_report.txt`
+`python   trace_error_checker.py /home/user/hw/ /home/user/hw/error_report.txt`
 
-**luxoft_hw directory** holds the **Demo_Exercise_Trace.btf** (script doesn't ask 
+**hw directory** holds the **Demo_Exercise_Trace.btf** (script doesn't ask 
 to include the filename to the path, cause we consider the name of the file is 
 always the same). Output file's name is up to user, so he can specify it by 
 himself.
@@ -18,7 +18,7 @@ Running tests is similair:
 
 for example:
 
-`python   test.py    /home/user/luxoft_hw/  `
+`python   test.py    /home/user/hw/  `
 
 
 User only has to specify path to the btf file directory, because output file 
